@@ -9,11 +9,11 @@ from common import fake_message
 
 CONFIG = {
     'bootstrap.servers': 'localhost:9094',
-    'acks': 'all',
-    'retries': 3
+    'acks': 'all',  # ждем подтверждение от всех синхронизированных в данный момент реплик
+    'retries': 3,  # 3 попытки отправки при ошибках
 }
 TOPIC_NAME = 'topic-1'
-QUEUE_FULL_TIMEOUT = 5
+QUEUE_FULL_TIMEOUT = 5  # время ожидания в случае заполненности очереди продюсера (секунды)
 
 producer = kafka.Producer(CONFIG)
 

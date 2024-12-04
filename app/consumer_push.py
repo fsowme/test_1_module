@@ -6,8 +6,8 @@ from common import Message
 CONFIG = {
     'bootstrap.servers': 'localhost:9094',
     'group.id': 'consumer_push',
-    'auto.offset.reset': 'earliest',
-    'enable.auto.commit': True,
+    'auto.offset.reset': 'earliest',  # начинаем читать сообщения с начала
+    'enable.auto.commit': True,  # коммитим смещение автоматически при получении
     'fetch.min.bytes': 1024,
 }
 TOPIC_NAME = 'topic-1'
@@ -18,7 +18,7 @@ consumer.subscribe([TOPIC_NAME])
 
 try:
     while True:
-        msg = consumer.poll()
+        msg = consumer.poll()  # timeout=None (-1) - ждем сообщение вечно
 
         error = msg.error()
         if error is not None:

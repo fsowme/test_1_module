@@ -6,8 +6,8 @@ from common import Message
 CONFIG = {
     'bootstrap.servers': 'localhost:9094',
     'group.id': 'consumer_pull',
-    'auto.offset.reset': 'earliest',
-    'enable.auto.commit': False,
+    'auto.offset.reset': 'earliest',  # начинаем читать сообщения с начала
+    'enable.auto.commit': False,  # не коммитим смещение автоматически при получении
 }
 TOPIC_NAME = 'topic-1'
 
@@ -17,7 +17,7 @@ consumer.subscribe([TOPIC_NAME])
 
 try:
     while True:
-        msg = consumer.poll(0.5)
+        msg = consumer.poll(0.5)  # timeout=0.5 - ждем сообщение пол секунды
 
         if msg is None:
             continue
@@ -35,7 +35,6 @@ try:
             print(f'Message deserialization error, msg: {value}, error: {error}')
             consumer.commit(asynchronous=False)
             continue
-
 
         print(f"Получено сообщение: {message}, offset={msg.offset()}, partition={msg.partition()}")
         consumer.commit(asynchronous=False)
