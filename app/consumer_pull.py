@@ -1,43 +1,14 @@
-from confluent_kafka import Consumer
-from confluent_kafka.serialization import SerializationError
+from common import Config, ConsumeJob
 
-from common import Message
-
-CONFIG = {
-    'bootstrap.servers': 'localhost:9094',
-    'group.id': 'consumer_pull',
-    'auto.offset.reset': 'earliest',  # начинаем читать сообщения с начала
-    'enable.auto.commit': False,  # не коммитим смещение автоматически при получении
-}
-TOPIC_NAME = 'topic-1'
-
-consumer = Consumer(CONFIG)
-consumer.subscribe([TOPIC_NAME])
+CONFIG = Config(
+    group__id='consumer_pull',
+    auto__offset__reset='earliest',
+    enable__auto__commit=False,
+    bootstrap__servers='localhost:9094'
+)
+TOPIC = 'topic-1'
 
 
-try:
-    while True:
-        msg = consumer.poll(0.5)  # timeout=0.5 - ждем сообщение пол секунды
-
-        if msg is None:
-            continue
-
-        error = msg.error()
-        if error is not None:
-            print(f"Ошибка: {error}")
-            continue
-
-        value = msg.value()
-
-        try:
-            message = Message.deserialize(value)
-        except SerializationError as error:
-            print(f'Message deserialization error, msg: {value}, error: {error}')
-            consumer.commit(asynchronous=False)
-            continue
-
-        print(f"Получено сообщение: {message}, offset={msg.offset()}, partition={msg.partition()}")
-        consumer.commit(asynchronous=False)
-
-finally:
-    consumer.close()
+with ConsumeJob(CONFIG) as job:
+    for message in job.run(TOPIC, 0.5):
+        print(message)
