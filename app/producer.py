@@ -1,3 +1,4 @@
+import logging
 import random
 import time
 
@@ -6,6 +7,8 @@ import confluent_kafka as kafka
 from confluent_kafka.serialization import SerializationError
 
 from common import fake_message
+
+logger = logging.getLogger(__name__)
 
 CONFIG = {
     'bootstrap.servers': 'localhost:9094',
@@ -24,17 +27,16 @@ while True:
     try:
         raw = message.serialize()
     except SerializationError as error:
-        print(f'Message serialization error, msg: {message}, error: {error}')
+        logger.error('Message serialization error, msg: %s, error: %s', message, error)
         continue
 
     try:
         producer.produce(topic=TOPIC_NAME, value=raw)
     except BufferError as error:
-        print(f'Internal producer message queue is full, error: {error}')
+        logger.error('Internal producer message queue is full, error: %s', error)
         time.sleep(QUEUE_FULL_TIMEOUT)
     except confluent_kafka.KafkaException as error:
-        print(f'Something went wrong, error: {error}')
-        print(f'Message not sent, message: {message}')
+        logger.error('Something went wrong, message:%s, error: %s', message, error)
         raise
 
     time.sleep(random.uniform(0.1, 2.0))
